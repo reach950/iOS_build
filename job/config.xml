@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>iOS自动打包模板</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.6">
+      <gitLabConnection></gitLabConnection>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>SCHEME</name>
+          <description>指定scheme名称</description>
+          <defaultValue>有道笔记-simulator</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CONFIGURATION</name>
+          <description>构建配置，Release，Debug等</description>
+          <defaultValue>Debug</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OUTPUT_FOLDER</name>
+          <description>编译后的安装包存放路径</description>
+          <defaultValue>build</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>XCWORKSPACE</name>
+          <description>workspace文件路径</description>
+          <defaultValue>YNote.xcworkspace</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SDK</name>
+          <description>指定安装sdk的设备，iPhoneos或iphonesimulator</description>
+          <defaultValue>iphonesimulator</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.1">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://gitlab.corp.youdao.com/ynoteios/ynoteios.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>**</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.SCMTrigger>
+      <spec></spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>python3 build_scripts/build.py \
+    --workspace ${XCWORKSPACE} \
+	--scheme ${SCHEME} \
+    --configuration ${CONFIGURATION} \
+    --output ${OUTPUT_FOLDER} \
+    --sdk ${SDK}</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.postbuildtask.PostbuildTask plugin="postbuild-task@1.8">
+      <tasks>
+        <hudson.plugins.postbuildtask.TaskProperties>
+          <logTexts>
+            <hudson.plugins.postbuildtask.LogProperties>
+              <logText>BUILD FAILED</logText>
+              <operator>AND</operator>
+            </hudson.plugins.postbuildtask.LogProperties>
+          </logTexts>
+          <EscalateStatus>false</EscalateStatus>
+          <RunIfJobSuccessful>false</RunIfJobSuccessful>
+          <script># 去指定的目录中执行git操作，获取到git author相关信息&#xd;
+if [ -f gitPath ]&#xd;
+then &#xd;
+    path=$(head -n1 gitPath)&#xd;
+    cd $path&#xd;
+fi&#xd;
+author=$(git log |head -n6|grep Author |awk -F&apos;&lt;&apos; &apos;{print $2}&apos;|awk -F&apos;&gt;&apos; &apos;{print $1}&apos;)&#xd;
+date=$(git log |head -n6|grep Date |awk -F&apos;: &apos; &apos;{print $2}&apos;)&#xd;
+comment=$(git log |head -n5|tail -n1)&#xd;
+cd $WORKSPACE&#xd;
+&#xd;
+message=&quot;$JOB_NAME BUILD FAILED \nUrl : $GIT_URL \nBranch : $GIT_BRANCH \nCommit : $GIT_COMMIT \nAuthor : $author \nDate : $date \nComment : $comment \nBuild information : $BUILD_URL/console&quot;&#xd;
+curl -X POST http://th077x.corp.youdao.com:18098/jenkins/view/Application/job/NotifyPOPO/buildWithParameters -d &quot;email=$author&amp;message=$message&quot;</script>
+        </hudson.plugins.postbuildtask.TaskProperties>
+      </tasks>
+    </hudson.plugins.postbuildtask.PostbuildTask>
+  </publishers>
+  <buildWrappers/>
+</project>
