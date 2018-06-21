@@ -40,7 +40,7 @@ $ nohup java -jar jenkins_located_path/jenkins.war &
 $ python3 build_scripts/build.py \
     --scheme ${SCHEME} \
     --workspace ${XCWORKSPACE} \
-    --sdk iphonesimulator
+    --sdk iphonesimulator \
     --configuration ${CONFIGURATION} \
     --output_folder ${OUTPUT_FOLDER}
 ```
@@ -51,7 +51,7 @@ $ python3 build_scripts/build.py \
 $ python3 build_scripts/build.py \
     --scheme ${SCHEME} \
     --workspace ${XCWORKSPACE} \
-    --sdk iphoneos
+    --sdk iphoneos \
     --configuration ${CONFIGURATION} \
     --output_folder ${OUTPUT_FOLDER} \
     --export_options_plist_path ${PLIST}
