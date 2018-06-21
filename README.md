@@ -12,20 +12,20 @@ $ brew install python3
 $ pip3 install requests
 ```
 
-**2、运行jenkins，安装必备插件；**
+**3、运行jenkins，安装必备插件(Git plugin,Hudson Post build task)；**
 
 ```bash
 $ nohup java -jar jenkins_located_path/jenkins.war &
 ```
 
-**3、创建Jenkins Job；**
+**4、创建Jenkins Job；**
 
 - 在Jenkins中创建一个`Freestyle project`类型的Job，先不进行任何配置；
 - 然后将`config.xml`文件拷贝到`~/.jenkins/jobs/YourProject/`中覆盖原有配置文件，重启Jenkins；
 - 完成配置文件替换和重启后，刚创建好的Job就已完成了大部分配置；
 - 在`Job Configure`中根据项目实际情况调整配置，其中`Git Repositories`是必须修改的，其它配置项可选择性地进行调整。
 
-**4、在gitlab项目中添加webhook；**
+**5、在gitlab项目中添加webhook；**
 
 - webhook地址：http://your-jenkins-server/gitlab/notify_commit
 - [说明文档](http://note.youdao.com/groupshare/?token=186C10BBE6DA46A1949DD139EF7EF8B0&gid=209446)
@@ -37,7 +37,7 @@ $ nohup java -jar jenkins_located_path/jenkins.war &
 - 构建生成可在模拟器中运行的`.app`文件:
 
 ```bash
-$ python build_scripts/build.py \
+$ python3 build_scripts/build.py \
     --scheme ${SCHEME} \
     --workspace ${XCWORKSPACE} \
     --sdk iphonesimulator
@@ -48,7 +48,7 @@ $ python build_scripts/build.py \
 - 构建生成可在移动设备中运行的`.ipa`文件，需要在plist文件中设置签名证书:
 
 ```bash
-$ python build_scripts/build.py \
+$ python3 build_scripts/build.py \
     --scheme ${SCHEME} \
     --workspace ${XCWORKSPACE} \
     --sdk iphoneos
