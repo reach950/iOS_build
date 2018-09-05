@@ -41,6 +41,8 @@ def parse_args():
                         help="specify current user's password to unlock keychain")
     parser.add_argument("--fabric_key", dest="fabric_key", default=None,
                         help="specify fabric key to upload dSYM")
+    parser.add_argument("--env", dest="env", default='online', choices=['online', 'pre', 'test'],
+                        help="server environment")
 
     args = parser.parse_args()
     print("args: {}".format(args))

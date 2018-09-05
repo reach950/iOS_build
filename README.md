@@ -3,7 +3,7 @@
 **1、添加构建脚本；**
 
 - 将`build_scripts`文件夹及其文件拷贝至目标构建代码库的根目录下；
-- 修改pgyer_uploader中的_API_KEY
+- 修改pgyer_uploader中的_API_KEY；
 - 将`build_scripts`提交到项目的仓库中。
 
 **2、安装python3及requests库；**

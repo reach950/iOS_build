@@ -20,6 +20,7 @@ class iOSBuilder(object):
         self._archive_path = None
         self._password = options.password
         self._fabric_key = options.fabric_key
+        self._env = options.env
         self._build_params = self._get_build_params(
             options.project, options.workspace, options.scheme)
         self._prepare()
@@ -60,6 +61,8 @@ class iOSBuilder(object):
         """
         self._change_build_number()
         self._change_method()
+        # 在xcconfig中修改server环境
+        self._change_server_env()
 
         print("Output folder for ipa ============== {}".format(self._output_folder))
         try:
@@ -95,6 +98,34 @@ class iOSBuilder(object):
                 plist_content['method'] = self._package_type
             with open(plist_path, 'wb') as fp:
                 plistlib.dump(plist_content, fp)
+
+    def _change_server_env(self):
+
+        test_env = 'XCCONFIG_IS_TESTSERVER'
+        pre_env = 'XCCONFIG_IS_PRERELEASE'
+        test_env_yes = '{} = YES'.format(test_env)
+        test_env_no = '{} = NO'.format(test_env)
+        pre_env_yes = '{} = YES'.format(pre_env)
+        pre_env_no = '{} = NO'.format(pre_env)
+        xcconfig_path = os.path.join(os.getcwd(), 'AthenaPhone', 'Resources', 'xcconfig', '{}.xcconfig'
+                                     .format(self._configuration))
+
+        with open(xcconfig_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        with open(xcconfig_path, 'w', encoding='utf-8') as f_w:
+            for line in lines:
+                if self._env == 'test':
+                    if test_env_no in line:
+                        line = line.replace(test_env_no, test_env_yes)
+                    if pre_env_yes in line:
+                        line = line.replace(pre_env_yes, pre_env_no)
+                elif self._env == 'pre':
+                    if test_env_yes in line:
+                        line = line.replace(test_env_yes, test_env_no)
+                    if pre_env_no in line:
+                        line = line.replace(pre_env_no, pre_env_yes)
+                f_w.write(line)
 
     def _udpate_pod_dependencies(self):
         podfile = os.path.join(os.getcwd(), 'Podfile')
