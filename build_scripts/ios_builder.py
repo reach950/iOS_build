@@ -61,7 +61,7 @@ class iOSBuilder(object):
         """
         self._change_build_number()
         self._change_method()
-        # 在xcconfig中修改server环境
+        # 在xcconfig中修改server环境,只对有道乐读项目有效
         self._change_server_env()
 
         print("Output folder for ipa ============== {}".format(self._output_folder))
@@ -101,31 +101,32 @@ class iOSBuilder(object):
 
     def _change_server_env(self):
 
-        test_env = 'XCCONFIG_IS_TESTSERVER'
-        pre_env = 'XCCONFIG_IS_PRERELEASE'
-        test_env_yes = '{} = YES'.format(test_env)
-        test_env_no = '{} = NO'.format(test_env)
-        pre_env_yes = '{} = YES'.format(pre_env)
-        pre_env_no = '{} = NO'.format(pre_env)
-        xcconfig_path = os.path.join(os.getcwd(), 'AthenaPhone', 'Resources', 'xcconfig', '{}.xcconfig'
-                                     .format(self._configuration))
+        if self._env is not None:
+            test_env = 'XCCONFIG_IS_TESTSERVER'
+            pre_env = 'XCCONFIG_IS_PRERELEASE'
+            test_env_yes = '{} = YES'.format(test_env)
+            test_env_no = '{} = NO'.format(test_env)
+            pre_env_yes = '{} = YES'.format(pre_env)
+            pre_env_no = '{} = NO'.format(pre_env)
+            xcconfig_path = os.path.join(os.getcwd(), 'AthenaPhone', 'Resources', 'xcconfig', '{}.xcconfig'
+                                         .format(self._configuration))
 
-        with open(xcconfig_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
+            with open(xcconfig_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
 
-        with open(xcconfig_path, 'w', encoding='utf-8') as f_w:
-            for line in lines:
-                if self._env == 'test':
-                    if test_env_no in line:
-                        line = line.replace(test_env_no, test_env_yes)
-                    if pre_env_yes in line:
-                        line = line.replace(pre_env_yes, pre_env_no)
-                elif self._env == 'pre':
-                    if test_env_yes in line:
-                        line = line.replace(test_env_yes, test_env_no)
-                    if pre_env_no in line:
-                        line = line.replace(pre_env_no, pre_env_yes)
-                f_w.write(line)
+            with open(xcconfig_path, 'w', encoding='utf-8') as f_w:
+                for line in lines:
+                    if self._env == 'test':
+                        if test_env_no in line:
+                            line = line.replace(test_env_no, test_env_yes)
+                        if pre_env_yes in line:
+                            line = line.replace(pre_env_yes, pre_env_no)
+                    elif self._env == 'pre':
+                        if test_env_yes in line:
+                            line = line.replace(test_env_yes, test_env_no)
+                        if pre_env_no in line:
+                            line = line.replace(pre_env_no, pre_env_yes)
+                    f_w.write(line)
 
     def _udpate_pod_dependencies(self):
         podfile = os.path.join(os.getcwd(), 'Podfile')
