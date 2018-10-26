@@ -5,6 +5,7 @@ import os
 import subprocess
 import shutil
 import plistlib
+import sys
 
 
 class iOSBuilder(object):
@@ -27,16 +28,16 @@ class iOSBuilder(object):
 
     @staticmethod
     def run_shell(cmd_shell, need_result=False):
-        try:
-            if need_result:
-                process = subprocess.Popen(cmd_shell, shell=True, stdout=subprocess.PIPE)
-                process.wait()
-                return process.stdout.read().strip()
-            else:
-                process = subprocess.Popen(cmd_shell, shell=True)
-                process.wait()
-        except Exception as e:
-            print(e)
+        if need_result:
+            process = subprocess.Popen(cmd_shell, shell=True, stdout=subprocess.PIPE)
+            process.wait()
+            return process.stdout.read().strip()
+        else:
+            process = subprocess.Popen(cmd_shell, shell=True)
+            process.wait()
+        result_code = process.returncode
+        if result_code:
+            sys.exit(result_code)
 
     def _get_build_params(self, project, workspace, scheme):
         build_params = None
