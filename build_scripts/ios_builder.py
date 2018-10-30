@@ -31,13 +31,12 @@ class iOSBuilder(object):
         if need_result:
             process = subprocess.Popen(cmd_shell, shell=True, stdout=subprocess.PIPE)
             process.wait()
+            result_code = process.returncode
+            if result_code:
+                sys.exit(result_code)
             return process.stdout.read().strip()
         else:
-            process = subprocess.Popen(cmd_shell, shell=True)
-            process.wait()
-        result_code = process.returncode
-        if result_code:
-            sys.exit(result_code)
+            subprocess.check_call(cmd_shell, shell=True)
 
     def _get_build_params(self, project, workspace, scheme):
         build_params = None
